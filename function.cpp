@@ -1,4 +1,24 @@
 #include "function.h"
+
+// CONSTANT
+// Easy Level
+int rowsEasyLevel = 5;
+int colsEasyLevel = 5;
+int numsOfBombInEasyLevel = 7;
+// Medium Level
+int rowsMediumLevel = 10;
+int colsMediumLevel = 10;
+int numsOfBombInMediumLevel = 40;
+// Hard Level
+int rowsHardLevel = 23;
+int colsHardLevel = 11;
+int numsOfBombInHardLevel = 95;
+// Save The Game Before
+vector<vector<char>> tmpBoard{};
+vector<vector<bool>> tmpVisit{};
+vector<vector<char>> tmpBoardToDisplay{};
+bool tmpIsFirst = false;
+
 void clearScreen()
 {
     system("cls");
@@ -69,6 +89,24 @@ void printWhenPlay(vector<vector<char>> boardToDisplay, int numsOfBomb)
     cout << endl;
     menuWhenPlay();
 }
+void printWhenEndGame(vector<vector<char>> boardToDisplay, vector<vector<char>> board, int numsOfBomb){
+    cout << "So bom: " << numsOfBomb - count('F', boardToDisplay) << "\t";
+    cout << endl;
+    for (int i = 0; i < board.size(); i++)
+    {
+        for (int j = 0; j < board[0].size(); j++)
+        {
+            if(board[i][j] != 'M' && boardToDisplay[i][j] == 'F'){
+                boardToDisplay[i][j] = 'W';
+            }
+            if(board[i][j] == 'M' && boardToDisplay[i][j] != 'F'){
+                boardToDisplay[i][j] = 'M';
+            }
+        }
+    }
+    printBoard(boardToDisplay);
+    cout << endl;
+}
 int countBomb(vector<vector<char>> &board, int m, int n)
 {
     int count = 0;
@@ -92,25 +130,17 @@ int countBomb(vector<vector<char>> &board, int m, int n)
 }
 void push(queue<pair<int, int>> &q, vector<vector<bool>> &visit, int m, int n, vector<vector<char>> &board)
 {
-    if (m - 1 >= 0 && visit[m - 1][n] == false && board[m - 1][n] != 'M')
-    {
-        visit[m - 1][n] = true;
-        q.push({m - 1, n});
-    }
-    if (m + 1 < board.size() && visit[m + 1][n] == false && board[m + 1][n] != 'M')
-    {
-        visit[m + 1][n] = true;
-        q.push({m + 1, n});
-    }
-    if (n - 1 >= 0 && visit[m][n - 1] == false && board[m][n - 1] != 'M')
-    {
-        visit[m][n - 1] = true;
-        q.push({m, n - 1});
-    }
-    if (n + 1 < board[0].size() && visit[m][n + 1] == false && board[m][n + 1] != 'M')
-    {
-        visit[m][n + 1] = true;
-        q.push({m, n + 1});
+    for (int i = m - 1; i <= m + 1; i++) {
+        if (i >= 0 && i < board.size()) {
+            for (int j = n - 1; j <= n + 1; j++) {
+                if (j >= 0 && j < board[0].size()) {
+                    if(visit[i][j] == false && board[i][j] != 'M'){
+                        visit[i][j] = true;
+                        q.push({i, j});
+                    }
+                }
+            }
+        }
     }
 }
 vector<vector<char>> updateBoard(vector<vector<char>> &board, vector<int> &click, vector<vector<bool>> &visit)
@@ -189,9 +219,16 @@ vector<vector<char>> createBoard(int numsOfBomb, vector<int> click, int rows, in
 }
 void setFlag(vector<vector<char>> &boardToDisplay, vector<int> click)
 {
-    if (boardToDisplay[click[0]][click[1]] != 'B' || (boardToDisplay[click[0]][click[1]] > '0' && boardToDisplay[click[0]][click[1]] < '9'))
+    if (boardToDisplay[click[0]][click[1]] != ' ' || (boardToDisplay[click[0]][click[1]] > '0' && boardToDisplay[click[0]][click[1]] < '9'))
     {
         boardToDisplay[click[0]][click[1]] = 'F';
+    }
+}
+void unSetFlag(vector<vector<char>> &boardToDisplay, vector<int> click)
+{
+    if (boardToDisplay[click[0]][click[1]] != ' ' || (boardToDisplay[click[0]][click[1]] > '0' && boardToDisplay[click[0]][click[1]] < '9'))
+    {
+        boardToDisplay[click[0]][click[1]] = 'E';
     }
 }
 void copyBoardToDisplay(vector<vector<char>> &boardToDisplay, vector<vector<char>> board, vector<vector<bool>> visit)
@@ -296,7 +333,7 @@ void playGame()
             vector<vector<char>> boardToDisplay(rows, vector<char>(cols, 'E'));
             vector<vector<bool>> visit(rows, vector<bool>(cols, false));
             vector<vector<char>> board(rows, vector<char>(cols, 'E'));
-            while (count('E', boardToDisplay) + count('F', boardToDisplay) > numsOfBomb)
+            while (numsOfBomb != INT_MAX)
             {
                 printWhenPlay(boardToDisplay, numsOfBomb);
                 int choice;
@@ -322,9 +359,25 @@ void playGame()
                     pair<int, int> p;
                     cout << "Enter your square you want to set flag: ";
                     cin >> p.first >> p.second;
+                    while(p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols){
+                        cout << "You have already entered wrong choice. Please enter again!\n";
+                        cout << "Enter your square you want to set flag: ";
+                        cin >> p.first >> p.second;
+                    }
                     click.push_back(p.first);
                     click.push_back(p.second);
-                    setFlag(boardToDisplay, click);
+                    if(boardToDisplay[click[0]][click[1]] == 'F'){
+                        unSetFlag(boardToDisplay, click);
+                    }else{
+                        setFlag(boardToDisplay, click);
+                    }
+                    if(count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb){
+                        clearScreen();
+                        printWhenEndGame(boardToDisplay, board, numsOfBomb);
+                        cout << endl << "You are win!\n";
+                        numsOfBomb = INT_MAX;
+                        break;
+                    }
                     break;
                 }
                 case 3:
@@ -333,14 +386,22 @@ void playGame()
                     pair<int, int> p;
                     cout << "Enter your square you want to open: ";
                     cin >> p.first >> p.second;
+                    while(p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || boardToDisplay[p.first][p.second] == 'F'){
+                        cout << "You have already entered wrong choice. Please enter again!\n";
+                        cout << "Enter your square you want to set flag: ";
+                        cin >> p.first >> p.second;
+                    }
                     click.push_back(p.first);
                     click.push_back(p.second);
                     if (board[click[0]][click[1]] == 'M')
                     {
+                        board = updateBoard(board, click, visit);
+                        copyBoardToDisplay(boardToDisplay, board, visit);
                         clearScreen();
                         cout << "Bummm....\n";
-                        Sleep(10);
+                        Sleep(50);
                         clearScreen();
+                        printWhenEndGame(boardToDisplay, board, numsOfBomb);
                         cout << "End Game!\n";
                         numsOfBomb = INT_MAX;
                         break;
@@ -348,14 +409,24 @@ void playGame()
                     if (isFirst)
                     {
                         board = createBoard(numsOfBomb, click, rows, cols);
+                        // printBoard(board);
+                        // cout << "\n\n\n\n";
                         isFirst = false;
                     }
                     board = updateBoard(board, click, visit);
                     copyBoardToDisplay(boardToDisplay, board, visit);
+                    if(count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb ){
+                        clearScreen();
+                        printWhenEndGame(boardToDisplay, board, numsOfBomb);
+                        cout << endl << "You are win!\n";
+                        numsOfBomb = INT_MAX;
+                        break;
+                    }
                     break;
                 }
                 }
             }
+            
             break;
         }
         case 2:
