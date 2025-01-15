@@ -30,22 +30,6 @@ void menuLevel()
     cout << "2. Medium\n";
     cout << "3. Hard\n";
 }
-int count(char c, vector<vector<char>> board)
-{
-    int cnt = 0;
-    for (int i = 0; i < board.size(); i++)
-    {
-        for (int j = 0; j < board[0].size(); j++)
-        {
-            if (board[i][j] == c || (board[i][j] == 'F' && c == 'M'))
-            {
-                cnt++;
-            }
-        }
-    }
-    return cnt;
-}
-
 void printBoard(vector<vector<char>> board)
 {
     for (int i = 0; i < board.size(); i++)
@@ -61,6 +45,21 @@ void printBoard(vector<vector<char>> board)
         }
         cout << endl;
     }
+}
+int count(char c, vector<vector<char>> board)
+{
+    int cnt = 0;
+    for (int i = 0; i < board.size(); i++)
+    {
+        for (int j = 0; j < board[0].size(); j++)
+        {
+            if (board[i][j] == c || (board[i][j] == 'F' && c == 'M'))
+            {
+                cnt++;
+            }
+        }
+    }
+    return cnt;
 }
 void printWhenPlay(vector<vector<char>> boardToDisplay, int numsOfBomb)
 {
@@ -141,6 +140,7 @@ vector<vector<char>> updateBoard(vector<vector<char>> &board, vector<int> &click
     }
     return board;
 }
+
 vector<pair<int, int>> createAdjacent(int i, int j, vector<vector<char>> board)
 {
     vector<pair<int, int>> adjacent;
@@ -163,7 +163,7 @@ bool checkToSetBombs(int i, int j, vector<pair<int, int>> adjacent)
 {
     for (int m = 0; m < adjacent.size(); m++)
     {
-        if (i == adjacent[i].first && j == adjacent[i].second)
+        if (i == adjacent[m].first && j == adjacent[m].second)
         {
             return true;
         }
@@ -200,16 +200,19 @@ void copyBoardToDisplay(vector<vector<char>> &boardToDisplay, vector<vector<char
     {
         for (int j = 0; j < board[0].size(); j++)
         {
-            if (board[i][j] != 'E' && (board[i][j] == 'M' && !visit[i][j]))
+            if (board[i][j] != 'E' )
             {
-                if (board[i][j] == 'B')
-                {
-                    boardToDisplay[i][j] = ' ';
+                if(!(board[i][j] == 'M' && !visit[i][j])){
+                    if (board[i][j] == 'B')
+                    {
+                        boardToDisplay[i][j] = ' ';
+                    }
+                    else
+                    {
+                        boardToDisplay[i][j] = board[i][j];
+                    }
                 }
-                else
-                {
-                    boardToDisplay[i][j] = board[i][j];
-                }
+                
             }
         }
     }
@@ -293,7 +296,7 @@ void playGame()
             vector<vector<char>> boardToDisplay(rows, vector<char>(cols, 'E'));
             vector<vector<bool>> visit(rows, vector<bool>(cols, false));
             vector<vector<char>> board(rows, vector<char>(cols, 'E'));
-            while (count('E', boardToDisplay) > numsOfBomb)
+            while (count('E', boardToDisplay) + count('F', boardToDisplay) > numsOfBomb)
             {
                 printWhenPlay(boardToDisplay, numsOfBomb);
                 int choice;
@@ -334,7 +337,10 @@ void playGame()
                     click.push_back(p.second);
                     if (board[click[0]][click[1]] == 'M')
                     {
+                        clearScreen();
                         cout << "Bummm....\n";
+                        Sleep(10);
+                        clearScreen();
                         cout << "End Game!\n";
                         numsOfBomb = INT_MAX;
                         break;
@@ -346,22 +352,10 @@ void playGame()
                     }
                     board = updateBoard(board, click, visit);
                     copyBoardToDisplay(boardToDisplay, board, visit);
+                    break;
                 }
                 }
             }
-
-            // vector<int> click;
-            // pair<int, int> p;
-            // cin >> p.first >> p.second;
-            // click.push_back(p.first);
-            // click.push_back(p.second);
-            // vector<vector<char>> board = createBoard(numsOfBomb, click, rows, cols);
-            // while(count('-', boardToDisplay) != count('M', boardToDisplay)){
-
-            // }
-
-            // board = updateBoard(board, click, visit);
-            // printBoard(board);
             break;
         }
         case 2:
