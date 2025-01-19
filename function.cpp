@@ -21,9 +21,10 @@ bool tmpIsFirst = false;
 // The path to save the game after it was abruptly close
 string pathToSave = "DataUser/username/gameSave";
 
-
-void login(){
-    
+void menuLogin()
+{
+    cout << "1. Sign in\n";
+    cout << "2. Sign up\n";
 }
 
 void clearScreen()
@@ -96,17 +97,20 @@ void printWhenPlay(vector<vector<char>> boardToDisplay, int numsOfBomb)
     cout << endl;
     menuWhenPlay();
 }
-void printWhenEndGame(vector<vector<char>> boardToDisplay, vector<vector<char>> board, int numsOfBomb){
+void printWhenEndGame(vector<vector<char>> boardToDisplay, vector<vector<char>> board, int numsOfBomb)
+{
     cout << "So bom: " << numsOfBomb - count('F', boardToDisplay) << "\t";
     cout << endl;
     for (int i = 0; i < board.size(); i++)
     {
         for (int j = 0; j < board[0].size(); j++)
         {
-            if(board[i][j] != 'M' && boardToDisplay[i][j] == 'F'){
+            if (board[i][j] != 'M' && boardToDisplay[i][j] == 'F')
+            {
                 boardToDisplay[i][j] = 'W';
             }
-            if(board[i][j] == 'M' && boardToDisplay[i][j] != 'F'){
+            if (board[i][j] == 'M' && boardToDisplay[i][j] != 'F')
+            {
                 boardToDisplay[i][j] = 'M';
             }
         }
@@ -137,11 +141,16 @@ int countBomb(vector<vector<char>> &board, int m, int n)
 }
 void push(queue<pair<int, int>> &q, vector<vector<char>> &visit, int m, int n, vector<vector<char>> &board)
 {
-    for (int i = m - 1; i <= m + 1; i++) {
-        if (i >= 0 && i < board.size()) {
-            for (int j = n - 1; j <= n + 1; j++) {
-                if (j >= 0 && j < board[0].size()) {
-                    if(visit[i][j] == '0' && board[i][j] != 'M'){
+    for (int i = m - 1; i <= m + 1; i++)
+    {
+        if (i >= 0 && i < board.size())
+        {
+            for (int j = n - 1; j <= n + 1; j++)
+            {
+                if (j >= 0 && j < board[0].size())
+                {
+                    if (visit[i][j] == '0' && board[i][j] != 'M')
+                    {
                         visit[i][j] = '1';
                         q.push({i, j});
                     }
@@ -244,9 +253,10 @@ void copyBoardToDisplay(vector<vector<char>> &boardToDisplay, vector<vector<char
     {
         for (int j = 0; j < board[0].size(); j++)
         {
-            if (board[i][j] != 'E' )
+            if (board[i][j] != 'E')
             {
-                if(!(board[i][j] == 'M' && visit[i][j] == '0')){
+                if (!(board[i][j] == 'M' && visit[i][j] == '0'))
+                {
                     if (board[i][j] == 'B')
                     {
                         boardToDisplay[i][j] = ' ';
@@ -256,13 +266,13 @@ void copyBoardToDisplay(vector<vector<char>> &boardToDisplay, vector<vector<char
                         boardToDisplay[i][j] = board[i][j];
                     }
                 }
-                
             }
         }
     }
 }
 
-void readBoardToFile(vector<vector<char>> boardToDisplay, string level, string fileName){
+void readBoardToFile(vector<vector<char>> boardToDisplay, string level, string fileName)
+{
     ofstream ofs;
     ofs.open(fileName);
     ofs << level << endl;
@@ -270,23 +280,28 @@ void readBoardToFile(vector<vector<char>> boardToDisplay, string level, string f
     string col{};
     row = "rows" + level;
     col = "cols" + level;
-    for(int i = 0; i < stoi(row); i++){
-        for(int j = 0; j < stoi(col); j++){
+    for (int i = 0; i < stoi(row); i++)
+    {
+        for (int j = 0; j < stoi(col); j++)
+        {
             ofs << boardToDisplay[i][j] << " ";
         }
         ofs << endl;
     }
     ofs.close();
 }
-void extractBoardFromFile(vector<vector<char>>& boardToDisplay, string& level, string fileName){
+void extractBoardFromFile(vector<vector<char>> &boardToDisplay, string &level, string fileName)
+{
     ifstream ifs;
     ifs.open(fileName);
-    if(!ifs.is_open()){
+    if (!ifs.is_open())
+    {
         cout << "Mo file that bai\n";
         return;
     }
     int k = 0;
-    while(ifs.good() && k < 5){
+    while (ifs.good() && k < 5)
+    {
         for (int i = 0; i < 5; i++)
         {
             string tmp{};
@@ -302,7 +317,314 @@ void extractBoardFromFile(vector<vector<char>>& boardToDisplay, string& level, s
     }
     ifs.close();
 }
+void writeTimeToFile(int h, int m, int s, string fileName)
+{
+    ofstream ofs;
+    ofs.open(fileName, ios::app);
+    string hours = to_string(h);
+    string minutes = to_string(m);
+    string seconds = to_string(s);
+    ofs << hours << ":" << minutes << ":" << seconds << "\n";
+    ofs.close();
+}
+bool checkPassWord(string password){
+    if(password.size() < 8){
+        return false;
+    }
+    for(int i = 0; i < password.size(); i++){
+        if(!(islower(password[i]) || isupper(password[i]) || isdigit(password[i]) || password[i] != '\b')){
+            return false;
+        }
+    }
+    return true;
+}
+bool checkUsername(string username){
+    if(username.size() < 8 || username.size() > 20){
+        return false;
+    }
+    for(int i = 0; i < username.size(); i++){
+        if(!(islower(username[i]) || isupper(username[i]) || isdigit(username[i]) || username[i] != '\b')){
+            return false;
+        }
+    }
+    return true;
+}
+string hiddenPass(){
+    string pass{};
+    char c;
+    cout << "Password: ";
+    while(true){
+        c = _getch();
+        if(c == '\r'){
+            cout << endl;
+            break;
+        }
+        pass += c;
+        cout << "*";
+    }
+    return pass;
+}
+user login(hashTable& h){
+    user u{};
+    bool flag = true;
+    while(flag){
+        menuLogin();
+        int choose;
+        cout << "Enter your choice: ";
+        cin >> choose;
+        switch(choose){
+            case 1:{
+                string username{};
+                cout << "Enter your username and password\n";
+                cout << "Username: ";
+                cin >> username;
+                string pass = hiddenPass();
+                while(h.searchValue(username) == "" || h.searchValue(username) == "-1"){
+                    cout << "Your username/password is not correct. Please enter again!\n";
+                    cout << "Enter your username and password\n";
+                    cout << "Username: ";
+                    cin >> username;
+                    pass = hiddenPass();
+                }
+                u.password = pass;
+                u.username = username;
+                return u;
+            }
+            case 2:{
+
+            }
+            default:{
+                cout << "You have already entered a wrong choice! Please enter again!!!\n";
+                break;
+            }
+        }
+    }
+}
 // Ham lon
+void newGame()
+{
+    bool isCancel = false;
+    int rows = 0;
+    int cols = 0;
+    int numsOfBomb = 0;
+    string levelToUseInFile{};
+    while (!isCancel)
+    {
+        menuLevel();
+        int level;
+        cout << "Enter your level you want to play: ";
+        cin >> level;
+        switch (level)
+        {
+        case 0:
+        {
+            isCancel = true;
+            break;
+        }
+        case 1:
+        {
+            rows = rowsEasyLevel;
+            cols = colsEasyLevel;
+            numsOfBomb = numsOfBombInEasyLevel;
+            levelToUseInFile = "EasyLevel";
+            isCancel = true;
+            break;
+        }
+        case 2:
+        {
+            rows = rowsMediumLevel;
+            cols = colsMediumLevel;
+            numsOfBomb = numsOfBombInMediumLevel;
+            levelToUseInFile = "MediumLevel";
+            isCancel = true;
+            break;
+        }
+        case 3:
+        {
+            rows = rowsHardLevel;
+            cols = colsHardLevel;
+            numsOfBomb = numsOfBombInHardLevel;
+            levelToUseInFile = "HardLevel";
+            isCancel = true;
+            break;
+        }
+        default:
+        {
+            clearScreen();
+            cout << "You have already entered a wrong choice! Please enter again!!!\n";
+            break;
+        }
+        }
+    }
+    clearScreen();
+    if (rows == 0)
+    {
+        return;
+    }
+    bool isFirst = true;
+    vector<vector<char>> boardToDisplay(rows, vector<char>(cols, 'E'));
+    vector<vector<char>> visit(rows, vector<char>(cols, '0'));
+    vector<vector<char>> board(rows, vector<char>(cols, 'E'));
+    auto start = chrono::steady_clock::now();
+    while (numsOfBomb != INT_MAX)
+    {
+        printWhenPlay(boardToDisplay, numsOfBomb);
+        int choice;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch (choice)
+        {
+        case 0:
+        {
+            if (!isFirst)
+            {
+                clearScreen();
+                cout << "Do you really want to exit this game?(Y/N): \n";
+                string isExit{};
+                cin >> isExit;
+                if (isExit == "N")
+                {
+                    clearScreen();
+                    break;
+                }
+                else
+                {
+                    clearScreen();
+                    isFirst = true;
+                }
+            }
+            // maybe add save in this
+            numsOfBomb = INT_MAX;
+            break;
+        }
+        case 1:
+        {
+            if (!isFirst)
+            {
+                clearScreen();
+                cout << "Do you really want to restart this game?(Y/N): \n";
+                string isRestart{};
+                cin >> isRestart;
+                if (isRestart == "N")
+                {
+                    break;
+                }
+                else
+                {
+                    isFirst = true;
+                }
+            }
+            vector<vector<char>> board(rows, vector<char>(cols, 'E'));
+            boardToDisplay = vector<vector<char>>(rows, vector<char>(cols, 'E'));
+            visit = vector<vector<char>>(rows, vector<char>(cols, '0'));
+            break;
+        }
+        case 2:
+        {
+            vector<int> click;
+            pair<int, int> p;
+            cout << "Enter your square you want to set flag: ";
+            cin >> p.first >> p.second;
+            while (p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' ')
+            {
+                cout << "You have already entered wrong choice. Please enter again!\n";
+                cout << "Enter your square you want to set flag: ";
+                cin >> p.first >> p.second;
+            }
+            click.push_back(p.first);
+            click.push_back(p.second);
+            clearScreen();
+            if (boardToDisplay[click[0]][click[1]] == 'F')
+            {
+                unSetFlag(boardToDisplay, click);
+            }
+            else
+            {
+                setFlag(boardToDisplay, click);
+            }
+            if (count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb)
+            {
+                auto end = chrono::steady_clock::now();
+                auto t = chrono::duration_cast<chrono::seconds>(end - start).count();
+                int h = t / 3600;
+                int m = (t % 3600) / 60;
+                int s = (t % 60);
+                string fileName = "";
+                writeTimeToFile(h, m, s, fileName);
+                clearScreen();
+                printWhenEndGame(boardToDisplay, board, numsOfBomb);
+                cout << endl
+                     << "You are win!\n";
+                cout << "Press any key to play game: ";
+                cin.ignore();
+                cin.get();
+                newGame();
+                numsOfBomb = INT_MAX;
+                break;
+            }
+            break;
+        }
+        case 3:
+        {
+            vector<int> click;
+            pair<int, int> p;
+            cout << "Enter your square you want to open: ";
+            cin >> p.first >> p.second;
+            while (p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || boardToDisplay[p.first][p.second] == 'F' || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' ')
+            {
+                cout << "You have already entered wrong choice. Please enter again!\n";
+                cout << "Enter your square you want to open: ";
+                cin >> p.first >> p.second;
+            }
+            click.push_back(p.first);
+            click.push_back(p.second);
+            clearScreen();
+            if (board[click[0]][click[1]] == 'M')
+            {
+                board = updateBoard(board, click, visit);
+                copyBoardToDisplay(boardToDisplay, board, visit);
+                clearScreen();
+                cout << "Bummm....\n";
+                Sleep(50);
+                clearScreen();
+                printWhenEndGame(boardToDisplay, board, numsOfBomb);
+                cout << "End Game!\n";
+                cout << "Press any key to play game: ";
+                cin.ignore();
+                cin.get();
+                clearScreen();
+                newGame();
+                numsOfBomb = INT_MAX;
+                break;
+            }
+            if (isFirst)
+            {
+                board = createBoard(numsOfBomb, click, rows, cols);
+                isFirst = false;
+            }
+            board = updateBoard(board, click, visit);
+            copyBoardToDisplay(boardToDisplay, board, visit);
+            if (count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb)
+            {
+                clearScreen();
+                printWhenEndGame(boardToDisplay, board, numsOfBomb);
+                cout << endl
+                     << "You are win!\n";
+                cout << "Press any key to play game: ";
+                cin.ignore();
+                cin.get();
+                clearScreen();
+                newGame();
+                numsOfBomb = INT_MAX;
+                break;
+            }
+            break;
+        }
+        }
+    }
+
+    return;
+}
 void playGame()
 {
     // Dat co de quan ly viec choi va thoat khoi game
@@ -326,196 +648,7 @@ void playGame()
         // New Game
         case 1:
         {
-            bool isCancel = false;
-            int rows = 0;
-            int cols = 0;
-            int numsOfBomb = 0;
-            string levelToUseInFile{};
-            while (!isCancel)
-            {
-                menuLevel();
-                int level;
-                cout << "Enter your level you want to play: ";
-                cin >> level;
-                switch (level)
-                {
-                case 0:
-                {
-                    isCancel = true;
-                    break;
-                }
-                case 1:
-                {
-                    rows = rowsEasyLevel;
-                    cols = colsEasyLevel;
-                    numsOfBomb = numsOfBombInEasyLevel;
-                    levelToUseInFile = "EasyLevel";
-                    isCancel = true;
-                    break;
-                }
-                case 2:
-                {
-                    rows = rowsMediumLevel;
-                    cols = colsMediumLevel;
-                    numsOfBomb = numsOfBombInMediumLevel;
-                    levelToUseInFile = "MediumLevel";
-                    isCancel = true;
-                    break;
-                }
-                case 3:
-                {
-                    rows = rowsHardLevel;
-                    cols = colsHardLevel;
-                    numsOfBomb = numsOfBombInHardLevel;
-                    levelToUseInFile = "HardLevel";
-                    isCancel = true;
-                    break;
-                }
-                default:
-                {
-                    clearScreen();
-                    cout << "You have already entered a wrong choice! Please enter again!!!\n";
-                    break;
-                }
-                }
-            }
-            clearScreen();
-            if (rows == 0)
-            {
-                break;
-            }
-            bool isFirst = true;
-            vector<vector<char>> boardToDisplay(rows, vector<char>(cols, 'E'));
-            vector<vector<char>> visit(rows, vector<char>(cols, '0'));
-            vector<vector<char>> board(rows, vector<char>(cols, 'E'));
-            while (numsOfBomb != INT_MAX)
-            {
-                printWhenPlay(boardToDisplay, numsOfBomb);
-                int choice;
-                cout << "Enter your choice: ";
-                cin >> choice;
-                switch (choice)
-                {
-                case 0:
-                {
-                    if(!isFirst){
-                        clearScreen();
-                        cout << "Do you really want to exit this game?(Y/N): \n";
-                        string isExit{};
-                        cin >> isExit;
-                        if(isExit == "N"){
-                            break;
-                        }else{
-                            isFirst = true;
-                        }
-                    }
-                    // maybe add save in this
-                    numsOfBomb = INT_MAX;
-                    break;
-                }
-                case 1:
-                {
-                    if(!isFirst){
-                        clearScreen();
-                        cout << "Do you really want to restart this game?(Y/N): \n";
-                        string isRestart{};
-                        cin >> isRestart;
-                        if(isRestart == "N"){
-                            break;
-                        }else{
-                            isFirst = true;
-                        }
-                    }
-                    vector<vector<char>> board(rows, vector<char>(cols, 'E'));
-                    boardToDisplay = vector<vector<char>>(rows, vector<char>(cols, 'E'));
-                    visit = vector<vector<char>>(rows, vector<char>(cols, '0'));
-                    break;
-                }
-                case 2:
-                {
-                    vector<int> click;
-                    pair<int, int> p;
-                    cout << "Enter your square you want to set flag: ";
-                    cin >> p.first >> p.second;
-                    while(p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' '){
-                        cout << "You have already entered wrong choice. Please enter again!\n";
-                        cout << "Enter your square you want to set flag: ";
-                        cin >> p.first >> p.second;
-                    }
-                    click.push_back(p.first);
-                    click.push_back(p.second);
-                    clearScreen();
-                    if(boardToDisplay[click[0]][click[1]] == 'F'){
-                        unSetFlag(boardToDisplay, click);
-                    }else{
-                        setFlag(boardToDisplay, click);
-                    }
-                    if(count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb){
-                        clearScreen();
-                        printWhenEndGame(boardToDisplay, board, numsOfBomb);
-                        cout << endl << "You are win!\n";
-                        cout << "Press any key to return the menu game: ";
-                        cin.ignore();
-                        cin.get();
-                        numsOfBomb = INT_MAX;
-                        break;
-                    }
-                    break;
-                }
-                case 3:
-                {
-                    vector<int> click;
-                    pair<int, int> p;
-                    cout << "Enter your square you want to open: ";
-                    cin >> p.first >> p.second;
-                    while(p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || boardToDisplay[p.first][p.second] == 'F' || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' '){
-                        cout << "You have already entered wrong choice. Please enter again!\n";
-                        cout << "Enter your square you want to open: ";
-                        cin >> p.first >> p.second;
-                    }
-                    click.push_back(p.first);
-                    click.push_back(p.second);
-                    clearScreen();
-                    if (board[click[0]][click[1]] == 'M')
-                    {
-                        board = updateBoard(board, click, visit);
-                        copyBoardToDisplay(boardToDisplay, board, visit);
-                        clearScreen();
-                        cout << "Bummm....\n";
-                        Sleep(50);
-                        clearScreen();
-                        printWhenEndGame(boardToDisplay, board, numsOfBomb);
-                        cout << "End Game!\n";
-                        cout << "Press any key to return the menu game: ";
-                        cin.ignore();
-                        cin.get();
-                        clearScreen();
-                        numsOfBomb = INT_MAX;
-                        break;
-                    }
-                    if (isFirst)
-                    {
-                        board = createBoard(numsOfBomb, click, rows, cols);
-                        isFirst = false;
-                    }
-                    board = updateBoard(board, click, visit);
-                    copyBoardToDisplay(boardToDisplay, board, visit);
-                    if(count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb ){
-                        clearScreen();
-                        printWhenEndGame(boardToDisplay, board, numsOfBomb);
-                        cout << endl << "You are win!\n";
-                        cout << "Press any key to return the menu game: ";
-                        cin.ignore();
-                        cin.get();
-                        clearScreen();
-                        numsOfBomb = INT_MAX;
-                        break;
-                    }
-                    break;
-                }
-                }
-            }
-            
+            newGame();
             break;
         }
         case 2:
