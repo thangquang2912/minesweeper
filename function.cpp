@@ -352,17 +352,60 @@ bool checkUsername(string username){
 string hiddenPass(){
     string pass{};
     char c;
-    cout << "Password: ";
     while(true){
         c = _getch();
         if(c == '\r'){
             cout << endl;
             break;
         }
-        pass += c;
-        cout << "*";
+        if(c == '\b'){
+            if(!pass.empty()){
+                pass.pop_back();
+            }
+            cout << "\b";
+        }else{
+            pass += c;
+            cout << "*";
+        }
+        
     }
     return pass;
+}
+void writeUsersToFile(user u){
+    ofstream ofs;
+    ofs.open("DataUsers/ListUsers.csv", ios::app);
+    ifstream ifs;
+    ifs.open("DataUsers/ListUsers.csv", ios::ate);
+    if(!ifs.is_open() || !ofs.is_open()){
+        cout << "Failed when opening file\n";
+        return;
+    }
+    bool flag = true;
+    if(ifs.tellg() == 0){
+        flag = false;
+    }
+    if(!flag){
+        ofs << u.username << "," << u.password;
+        return;
+    }
+    ofs << "\n" << u.username << "," << u.password;
+    ofs.close();
+}
+void readUser(hashTable& h){
+    ifstream ifs;
+    ifs.open("DataUsers/ListUsers.csv");
+    if(!ifs.is_open()){
+        cout << "Failed when opening file\n";
+        return;
+    }
+    while(!ifs.eof()){
+        string name{};
+        string pass{};
+        getline(ifs, name, ',');
+        getline(ifs, pass);
+        h.add(name, pass);
+    }
+    ifs.close();
 }
 user login(hashTable& h){
     user u{};
@@ -378,9 +421,12 @@ user login(hashTable& h){
                 cout << "Enter your username and password\n";
                 cout << "Username: ";
                 cin >> username;
+                cout << "Password: ";
                 string pass = hiddenPass();
-                while(h.searchValue(username) == "" || h.searchValue(username) == "-1"){
-                    cout << "Your username/password is not correct. Please enter again!\n";
+                while(h.searchValue(username) == "" || h.searchValue(username) != pass){
+                    clearScreen();
+                    cout << "Your username/password is not correct. Please enter again !\n";
+                    //or enter 'B' to return
                     cout << "Enter your username and password\n";
                     cout << "Username: ";
                     cin >> username;
@@ -391,7 +437,45 @@ user login(hashTable& h){
                 return u;
             }
             case 2:{
-
+                string username{};
+                cout << "Enter username and password you want to sign up\n";
+                cout << "Username and password only have digits, lower and upper letter. Username/Password must have 8->20 character\n";
+                cout << "Username: ";
+                cin >> username;
+                while(!checkUsername(username)){
+                    clearScreen();
+                    cout << "Username is not correct. Please enter again!\n";
+                    cout << "Username and password only have digits, lower and upper letter. Username/Password must have 8->20 character\n";
+                    cout << "Username: ";
+                    cin >> username;
+                }
+                while(h.searchValue(username) != ""){
+                    clearScreen();
+                    cout << "Username is valid. Please enter again!\n";
+                    cout << "Username and password only have digits, lower and upper letter. Username/Password must have 8->20 character\n";
+                    cout << "Username: ";
+                    cin >> username;
+                }
+                cout << "Password: ";
+                string pass = hiddenPass();
+                while(!checkPassWord(pass)){
+                    cout << "Password is not correct. Please enter again!\n";
+                    cout << "Username and password only have digits, lower and upper letter. Username/Password must have 8->20 character\n";
+                    cout << "Password: ";
+                    pass = hiddenPass();
+                }
+                cout << "Enter your password again: ";
+                string passAgain = hiddenPass();
+                while(pass!=passAgain){
+                    cout << "You have already have a wrong password. Please enter again!\n";
+                    cout << "Enter your password again: ";
+                    passAgain = hiddenPass();
+                }
+                h.add(username, pass);
+                u.password = pass;
+                u.username = username;
+                writeUsersToFile(u);
+                break;
             }
             default:{
                 cout << "You have already entered a wrong choice! Please enter again!!!\n";
@@ -625,41 +709,45 @@ void newGame()
 
     return;
 }
-void playGame()
+void playGame(hashTable& h)
 {
-    // Dat co de quan ly viec choi va thoat khoi game
-    bool flag = true;
-    while (flag)
-    {
-        // tao menu lua chon cho user nhap vao
-        menuGame();
-        int choose;
-        cout << "Enter your choice: ";
-        cin >> choose;
-        clearScreen();
-        switch (choose)
+    while(1){
+        user u = login(h);
+        // Dat co de quan ly viec choi va thoat khoi game
+        bool flag = true;
+        while (flag)
         {
-        // exit
-        case 0:
-        {
-            flag = false;
-            break;
-        }
-        // New Game
-        case 1:
-        {
-            newGame();
-            break;
-        }
-        case 2:
-        {
-        }
-        case 3:
-        {
-        }
-        case 4:
-        {
-        }
+            // tao menu lua chon cho user nhap vao
+            menuGame();
+            int choose;
+            cout << "Enter your choice: ";
+            cin >> choose;
+            clearScreen();
+            switch (choose)
+            {
+            // exit
+            case 0:
+            {
+                flag = false;
+                break;
+            }
+            // New Game
+            case 1:
+            {
+                newGame();
+                break;
+            }
+            case 2:
+            {
+            }
+            case 3:
+            {
+            }
+            case 4:
+            {
+            }
+            }
         }
     }
+    
 }

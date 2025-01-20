@@ -86,7 +86,7 @@ struct hashTable
     string searchValue ( string key ) {
         unsigned int index = hashFunction(key);
         if(table[index] == nullptr){
-            return "-1";
+            return "";
         }
         while(table[index] != nullptr){
             if(table[index] != nullptr && table[index]->key == key){
@@ -119,6 +119,7 @@ struct hashTable
 
 
 void clearScreen();
+void readUser(hashTable& h);
 user login(hashTable& h);
-void playGame();
+void playGame(hashTable& h);
 #endif
