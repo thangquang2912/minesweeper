@@ -1,3 +1,6 @@
+//Có thể thêm phần gợi ý cho quá trình chơi game ở các mức độ
+//nghĩ thêm tính năng thoát ra khỏi các mục cho đẹp hơn
+//them gioi han so bom cho dong va cot khi sinh ngau nhien
 #ifndef function_h
 #define function_h
 #include <iostream>
@@ -15,12 +18,13 @@
 #include<cctype>
 #include<conio.h>
 #include<filesystem>
+#include<thread>
 using namespace std;
 namespace fs = filesystem;
 struct user{
     string username;
     string password;
-    string nameInGame;
+    //string nameInGame;
 };
 struct hashTable
 {
@@ -118,10 +122,25 @@ struct hashTable
     }
 };
 
+struct node {
+    string no;
+    string username;
+    string time;
+    node* next = nullptr;
+};
+struct listNode{        
+    node* head = nullptr;
+    int size = 0;
+};
 
 
+
+
+
+void getListHighscores(string filename, listNode& list);
+listNode initList();
 void clearScreen();
 void readUser(hashTable& h);
 user login(hashTable& h);
-void playGame(hashTable& h);
+void playGame(hashTable& h, listNode& list);
 #endif

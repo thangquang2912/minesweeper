@@ -2,17 +2,17 @@
 
 // CONSTANT
 // Easy Level
-int rowsEasyLevel = 5;
-int colsEasyLevel = 5;
-int numsOfBombInEasyLevel = 7;
+int rowsEasyLevel = 8;
+int colsEasyLevel = 8;
+int numsOfBombInEasyLevel = 10;
 // Medium Level
-int rowsMediumLevel = 10;
-int colsMediumLevel = 10;
+int rowsMediumLevel = 16;
+int colsMediumLevel = 16;
 int numsOfBombInMediumLevel = 40;
 // Hard Level
-int rowsHardLevel = 23;
-int colsHardLevel = 11;
-int numsOfBombInHardLevel = 95;
+int rowsHardLevel = 30;
+int colsHardLevel = 16;
+int numsOfBombInHardLevel = 99;
 // Save The Game Before
 vector<vector<char>> tmpBoard{};
 vector<vector<bool>> tmpVisit{};
@@ -20,6 +20,7 @@ vector<vector<char>> tmpBoardToDisplay{};
 bool tmpIsFirst = false;
 // The path to save the game after it was abruptly close
 string pathToSave = "DataUser/username/gameSave";
+bool stopThread = false;
 
 void menuLogin()
 {
@@ -50,12 +51,11 @@ void menuGameNotCon(user u){
 }
 void menuOption(user u)
 {
-    cout << setw(30) << u.username;
+    cout << setw(30) << u.username << endl;
     cout << "0. Back\n";
-    cout << "1. Country\n";
-    cout << "2. My Highscores\n";
-    cout << "3. About\n";
-    cout << "4. Help\n";
+    cout << "1. My Highscores\n";
+    cout << "2. About\n";
+    cout << "3. Help\n";
 }
 void menuWhenPlay()
 {
@@ -342,15 +342,212 @@ void extractBoardFromFile(vector<vector<char>> &board, string &level, string fil
     }
     ifs.close();
 }
-void writeTimeToFile(int h, int m, int s, string fileName)
+void writeTimeToFile(string fileName, int x)
 {
-    ofstream ofs;
-    ofs.open(fileName, ios::app);
-    string hours = to_string(h);
-    string minutes = to_string(m);
-    string seconds = to_string(s);
-    ofs << hours << ":" << minutes << ":" << seconds << "\n";
+    auto start = chrono::steady_clock::now();
+    while(!stopThread){
+        auto cur = chrono::steady_clock::now();
+        auto ago = x;
+        auto timePlay = chrono::duration_cast<chrono::seconds>(cur - start).count() + x;
+        int hours = timePlay/3600;
+        int minutes = (timePlay%3600)/60;
+        int seconds = timePlay%60;
+        ofstream ofs;
+        ofs.open(fileName);
+        ofs << hours << ":" << minutes << ":" << seconds;
+        ofs.close();
+    }
+}
+listNode initList(){
+    listNode list{};
+    list.head = nullptr;
+    return list;
+}
+node* createNode(string no, string username, string time){
+    node* n = new node;
+    n->no = no;
+    n->username = username;
+    n->time = time;
+    n->next = nullptr;
+    return n;
+}
+int convertTimeToInt(node* n){
+    if(n == nullptr){
+        return 0;
+    }
+    int j = 2;
+    int res = 0;
+    string tmp{};
+    for(int i = 0; i < n->time.size(); i++){
+        if(n->time[i] == ':'){
+            int t = stoi(tmp);
+            res += t*pow(60,j--);
+            tmp = {};
+        }else{
+            tmp += n->time[i];
+        }
+    }
+    return res;
+}
+node* findToAdd(node* n, listNode list){
+    int t = convertTimeToInt(n);
+    if(list.head == nullptr || t <= convertTimeToInt(list.head)){
+        return nullptr;
+    }
+    node* tmp = list.head;
+    if(tmp->next == nullptr){
+        return tmp;
+    }
+    while(tmp->next->next != nullptr){
+        if(convertTimeToInt(tmp) > t && convertTimeToInt(tmp->next) <= t){
+            return tmp;
+        }
+        tmp = tmp->next;
+    }
+    if(tmp->next->next == nullptr){
+        if(convertTimeToInt(tmp) > t && convertTimeToInt(tmp->next) <= t){
+            return tmp;
+        }else{
+            return tmp->next;
+        }
+    }
+    return nullptr;
+}
+void removeNode(listNode& list){
+    if(list.head == nullptr){
+        return;
+    }
+    node* tmp = list.head;
+    node* pre = nullptr;
+    while(tmp->next == nullptr){
+        pre = tmp;
+        tmp = tmp->next;
+    }
+    pre->next = nullptr;
+    tmp = nullptr;
+    delete tmp;
+}
+void addNode(node* n, listNode& list){
+    if(list.head == nullptr){
+        list.head = n;
+        return;
+    }
+    node* tmp = list.head;
+    while(tmp->next != nullptr){
+        tmp = tmp->next;
+    }
+    tmp->next = n;
+}
+void writeHighscoreToFile(string filename, listNode list){
+    ofstream ofs(filename);
+    if(!ofs.is_open()){
+        return;
+    }
+    ofs << "No,Username,Time";
+    if(list.head == nullptr){
+        ofs << "No,Username,Time";
+        return;
+    }
+    node* tmp = list.head;
+    int i = 1;
+    while(tmp != nullptr){
+        int j = i;
+        while(convertTimeToInt(tmp) == convertTimeToInt(tmp->next)){
+            ofs << "\n" << to_string(j) << "," << tmp->username << "," << tmp->time;
+            i++;
+            tmp = tmp->next;
+        }
+        ofs << "\n" << to_string(i) << "," << tmp->username << "," << tmp->time;
+        tmp = tmp->next;
+    }
     ofs.close();
+}
+void getListHighscores(string filename, listNode& list){
+    ifstream ifs;
+    ifs.open(filename);
+    if(!ifs.is_open()){
+        return ;
+    }
+    string tmp{};
+    getline(ifs, tmp);
+    list = {};
+    list.head = nullptr;
+    while(!ifs.eof()){
+        string tmp1{};
+        string tmp2{};
+        string tmp3{};
+        getline(ifs, tmp1, ',');
+        getline(ifs, tmp2, ',');
+        getline(ifs, tmp3);
+        node* n = createNode(tmp1, tmp2, tmp3);
+        addNode(n, list);
+    }
+}
+void addSort(node* n, listNode& list, string level){
+    node* add = findToAdd(n, list);
+    string filename = "DataActivity/Highscores" + level + ".csv";
+    if(add == nullptr){
+        node* tmp = list.head;
+        n->next = tmp;
+        list.head = n;
+        list.size++;
+        if(list.size > 100){
+            removeNode(list);
+        }
+        writeHighscoreToFile(filename, list);
+        getListHighscores(filename, list);
+        return;
+    }
+    if(add->next == nullptr && list.size != 100){
+        add->next = n;
+        list.size++;
+        if(list.size > 100){
+            removeNode(list);
+        }
+        writeHighscoreToFile(filename, list);
+        getListHighscores(filename, list);
+        return;
+    }
+    node* tmp = add->next;
+    add->next = n;
+    n->next = tmp;
+    list.size++;
+    if(list.size > 100){
+        removeNode(list);
+    }
+    writeHighscoreToFile(filename, list);
+    getListHighscores(filename, list);
+    return;
+}
+bool isEmpty(string filename){
+    ifstream ifs;
+    ifs.open(filename, ios::ate);
+    int size = ifs.tellg();
+    ifs.close();
+    if(size == 0){
+        return true;
+    }
+    return false;
+}
+int getSeconds(string fileName){
+    ifstream ifs(fileName);
+    if(!ifs.is_open() || isEmpty(fileName)){
+        return 0;
+    }
+    string h{};
+    string m{};
+    string s{};
+    getline(ifs,h,':');
+    getline(ifs,m,':');
+    getline(ifs,s);
+    int res = stoi(h)*3600 + stoi(m)*60 + stoi(s);
+    return res;
+}
+void updateRecord(string filename, string time){
+    ofstream ofs(filename);
+    ofs << time ;
+    ofs.close();
+    return;
 }
 bool checkPassWord(string password){
     if(password.size() < 8){
@@ -440,6 +637,7 @@ user login(hashTable& h){
         int choose;
         cout << "Enter your choice: ";
         cin >> choose;
+        clearScreen();
         switch(choose){
             case 1:{
                 string username{};
@@ -518,30 +716,62 @@ user login(hashTable& h){
     }
 }
 // Ham lon
-bool isEmpty(string filename){
+
+bool isExist(string filename){
     ifstream ifs;
     ifs.open(filename);
-    int size = ifs.tellg();
-    ifs.close();
-    if(size == 0){
+    if(ifs.is_open()){
+        ifs.close();
         return true;
     }
+    ifs.close();
     return false;
 }
-
-void newGame(user u, bool isCon)
+void print(string filename){
+    string tmp{};
+    ifstream ifs(filename);
+    if(!ifs.is_open()){
+        return;
+    }
+    while(!ifs.eof()){
+        string tmp1{};
+        getline(ifs,tmp1);
+        tmp += tmp1;
+        tmp += "\n";
+    }
+    for(int i = 0; i < tmp.size(); i++){
+        cout << tmp[i];
+        //<< flush
+        this_thread::sleep_for(chrono::milliseconds(12));
+    }
+    cout << endl;
+}
+string get(string filename){
+    string res{};
+    ifstream ifs(filename);
+    if(!ifs.is_open()){
+        return{};
+    }
+    getline(ifs, res);
+    return res;
+}
+void newGame(user u, bool isCon, listNode& list)
 {
     int rows = 0;
     int cols = 0;
     int numsOfBomb = 0;
     string levelToUseInFile{};
     bool isFirst = true;
+    stopThread = false;
     vector<vector<char>> boardToDisplay{};
     vector<vector<char>> visit{};
     vector<vector<char>> board{};
+    thread t{};
     string filename = "DataUsers/" + u.username + "/boardToDisplay.txt";
     string filename1 = "DataUsers/" + u.username + "/board.txt";
     string filename2 = "DataUsers/" + u.username + "/visit.txt";
+    string filename3 = "DataUsers/" + u.username + "/time.txt";
+    bool isStartTime = false;
     if(!isCon){
         bool isCancel = false;
         while (!isCancel)
@@ -606,17 +836,24 @@ void newGame(user u, bool isCon)
         {
             return;
         }
+        
         boardToDisplay = vector<vector<char>>(rows, vector<char>(cols, 'E'));
         visit = vector<vector<char>>(rows, vector<char>(cols, '0'));
         board = vector<vector<char>>(rows, vector<char>(cols, 'E'));
     }else{
         isFirst = false;
+        int s = getSeconds(filename3);
+        t = thread(writeTimeToFile,filename3, s);
+        isStartTime = true;
         extractBoardFromFile(boardToDisplay, levelToUseInFile, filename, rows, cols, numsOfBomb);
         extractBoardFromFile(board, levelToUseInFile, filename1, rows, cols, numsOfBomb);
         extractBoardFromFile(visit, levelToUseInFile, filename2, rows, cols, numsOfBomb);
     }
-    auto start = chrono::steady_clock::now();;
-    bool isStartTime = false;
+    string filename4 = "DataUsers/" + u.username +"/Highscores" + levelToUseInFile + ".txt";
+    if(!isExist(filename4)){
+        ofstream ofs(filename4);
+        ofs.close();
+    }
     while (numsOfBomb != INT_MAX)
     {
         printWhenPlay(boardToDisplay, numsOfBomb);
@@ -649,6 +886,9 @@ void newGame(user u, bool isCon)
                         fs::remove(filename);
                         fs::remove(filename1);
                         fs::remove(filename2);
+                        if(isExist(filename3)){
+                            fs::remove(filename3);
+                        }
                     }else{
                         cout << "Save succesfully!\n";
                         Sleep(1000);
@@ -678,6 +918,9 @@ void newGame(user u, bool isCon)
             fs::remove(filename);
             fs::remove(filename1);
             fs::remove(filename2);
+            if(isExist(filename3)){
+                fs::remove(filename3);
+            }
             vector<vector<char>> board(rows, vector<char>(cols, 'E'));
             boardToDisplay = vector<vector<char>>(rows, vector<char>(cols, 'E'));
             visit = vector<vector<char>>(rows, vector<char>(cols, '0'));
@@ -702,7 +945,8 @@ void newGame(user u, bool isCon)
             {
                 unSetFlag(boardToDisplay, click);
                 if(!isStartTime){
-                    start = chrono::steady_clock::now();
+                    int s = getSeconds(filename3);
+                    t = thread(writeTimeToFile,filename3, s);
                     isStartTime = true;
                 }
             }
@@ -710,7 +954,8 @@ void newGame(user u, bool isCon)
             {
                 setFlag(boardToDisplay, click);
                 if(!isStartTime){
-                    start = chrono::steady_clock::now();
+                    int s = getSeconds(filename3);
+                    t = thread(writeTimeToFile,filename3, s);
                     isStartTime = true;
                 }
             }
@@ -718,24 +963,33 @@ void newGame(user u, bool isCon)
             writeBoardToFile(boardToDisplay, levelToUseInFile, to_string(rows), to_string(cols), to_string(numsOfBomb), filename);
             if (count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb)
             {
+                stopThread = true;
+                t.join();
+                string ti = get(filename3);
+                node* n = createNode("0", u.username, ti);
+                addSort(n, list, levelToUseInFile);
+                if((getSeconds(filename4) != 0 && getSeconds(filename4) > convertTimeToInt(n)) || getSeconds(filename4) == 0){
+                    updateRecord(filename4, n->time);
+                    clearScreen();
+                    cout << "New Highscore !!!!\n";
+                    cout << "Time: " << n->time << endl;
+                    Sleep(1000);
+                    cout << "Press any key to continue: ";
+                    cin.ignore();
+                    cin.get();
+                }
                 fs::remove(filename);
                 fs::remove(filename1);
                 fs::remove(filename2);
-                auto end = chrono::steady_clock::now();
-                auto t = chrono::duration_cast<chrono::seconds>(end - start).count();
-                int h = t / 3600;
-                int m = (t % 3600) / 60;
-                int s = (t % 60);
-                //string fileName = "";
-                //writeTimeToFile(h, m, s, fileName);
+                fs::remove(filename3);
                 clearScreen();
                 printWhenEndGame(boardToDisplay, board, numsOfBomb);
                 cout << endl
                      << "You are win!\n";
-                cout << "Press any key to play game: ";
+                cout << "Press any key to continue: ";
                 cin.ignore();
                 cin.get();
-                newGame(u, false);
+                newGame(u, false, list);
                 numsOfBomb = INT_MAX;
                 break;
             }
@@ -759,9 +1013,12 @@ void newGame(user u, bool isCon)
             clearScreen();
             if (board[click[0]][click[1]] == 'M')
             {
+                stopThread = true;
+                t.join();
                 fs::remove(filename);
                 fs::remove(filename1);
                 fs::remove(filename2);
+                fs::remove(filename3);
                 board = updateBoard(board, click, visit);
                 copyBoardToDisplay(boardToDisplay, board, visit);
                 clearScreen();
@@ -769,12 +1026,12 @@ void newGame(user u, bool isCon)
                 Sleep(50);
                 clearScreen();
                 printWhenEndGame(boardToDisplay, board, numsOfBomb);
-                cout << "End Game!\n";
+                cout << "Game Over!\n";
                 cout << "Press any key to play game: ";
                 cin.ignore();
                 cin.get();
                 clearScreen();
-                newGame(u, false);
+                newGame(u, false, list);
                 numsOfBomb = INT_MAX;
                 break;
             }
@@ -784,7 +1041,8 @@ void newGame(user u, bool isCon)
                 isFirst = false;
             }
             if(!isStartTime){
-                start = chrono::steady_clock::now();
+                int s = getSeconds(filename3);
+                t = thread(writeTimeToFile,filename3, s);
                 isStartTime = true;
             }
             board = updateBoard(board, click, visit);
@@ -794,18 +1052,34 @@ void newGame(user u, bool isCon)
             writeBoardToFile(visit, levelToUseInFile, to_string(rows), to_string(cols), to_string(numsOfBomb), filename2);
             if (count('E', boardToDisplay) + count('F', boardToDisplay) == numsOfBomb)
             {
+                stopThread = true;
+                t.join();
+                string ti = get(filename3);
+                node* n = createNode("0", u.username, ti);
+                addSort(n, list, levelToUseInFile);
+                if((getSeconds(filename4) != 0 && getSeconds(filename4) > convertTimeToInt(n)) || getSeconds(filename4) == 0){
+                    updateRecord(filename4, n->time);
+                    clearScreen();
+                    cout << "New Highscore !!!!\n";
+                    cout << "Time: " << n->time << endl;
+                    Sleep(1000);
+                    cout << "Press any key to continue: ";
+                    cin.ignore();
+                    cin.get();
+                }
                 fs::remove(filename);
                 fs::remove(filename1);
                 fs::remove(filename2);
+                fs::remove(filename3);
                 clearScreen();
                 printWhenEndGame(boardToDisplay, board, numsOfBomb);
                 cout << endl
                      << "You are win!\n";
-                cout << "Press any key to play game: ";
+                cout << "Press any key to continue: ";
                 cin.ignore();
                 cin.get();
                 clearScreen();
-                newGame(u, false);
+                newGame(u, false, list);
                 numsOfBomb = INT_MAX;
                 break;
             }
@@ -817,15 +1091,168 @@ void newGame(user u, bool isCon)
         }
         }
     }
-
     return;
 }
-void option(){
-    
+void printHighscore(string filename){
+    listNode list{};
+    list.head = nullptr;
+    getListHighscores(filename, list);
+    cout << left << setw(4) << "No" << left << setw(25) << "username" << left << setw(12) << "Time" << endl;
+    if(list.head == nullptr){
+        return;
+    }
+    node* tmp = list.head;
+    while(tmp != nullptr){
+        cout << left << setw(4) << tmp->no << left << setw(25) << tmp->username << left << setw(12) << tmp->time << endl;
+        tmp = tmp->next;
+    }
 }
-void playGame(hashTable& h)
+void viewScoreBoard(){
+    bool out = false;
+    while(!out){
+        clearScreen();
+        menuLevel();
+        int choice;
+        cout << "Enter level you want to view scoreboards: ";
+        cin >> choice;
+        switch(choice){
+            case 0:{
+                clearScreen();
+                cout << "Do you really want to exit?(Y/N): \n";
+                string isExit{};
+                cin >> isExit;
+                clearScreen();
+                if (isExit == "N")
+                {
+                    break;
+                }
+                out = true;
+                break;
+            }
+            case 1:{
+                clearScreen();
+                string filename = "DataActivity/HighscoresEasyLevel.csv";
+                cout << "----------------HighscoresEasyLevel----------------\n";
+                printHighscore(filename);
+                Sleep(2000);
+                cout << "Press any key to continue: ";
+                cin.ignore();
+                cin.get();
+                clearScreen();
+                break;
+            }
+            case 2:{
+                clearScreen();
+                string filename = "DataActivity/HighscoresMediumLevel.csv";
+                cout << "----------------HighscoresMediumLevel----------------\n";
+                printHighscore(filename);
+                Sleep(2000);
+                cout << "Press any key to continue: ";
+                cin.ignore();
+                cin.get();
+                break;
+            }
+            case 3:{
+                clearScreen();
+                string filename = "DataActivity/HighscoresHardLevel.csv";
+                cout << "----------------HighscoresHardLevel----------------\n";
+                printHighscore(filename);
+                Sleep(2000);
+                cout << "Press any key to continue: ";
+                cin.ignore();
+                cin.get();
+                break;
+            }
+            default:
+            {
+                clearScreen();
+                cout << "You have already entered a wrong choice! Please enter again!!!\n";
+                Sleep(1000);
+                break;
+            }
+        }
+    }
+}
+
+void option(user u){
+    bool out = false;
+    while(!out){
+        clearScreen();
+        menuOption(u);
+        int choice;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch(choice){
+            case 0:{
+                clearScreen();
+                cout << "Do you really want to exit?(Y/N): \n";
+                string isExit{};
+                cin >> isExit;
+                clearScreen();
+                if (isExit == "N")
+                {
+                    break;
+                }
+                out = true;
+                break;
+            }
+            case 1:{
+                clearScreen();
+                string filename = "DataUsers/" + u.username +"/HighscoresEasyLevel.txt";
+                string filename1 = "DataUsers/" + u.username +"/HighscoresMediumLevel.txt";
+                string filename2 = "DataUsers/" + u.username +"/HighscoresHardLevel.txt";
+                if(isExist(filename) == true && isEmpty(filename) == false){
+                    string tmp = get(filename);
+                    cout << "Highscore Easy Level: " << tmp << endl;
+                }
+                if(isExist(filename1) == true && isEmpty(filename1) == false){
+                    string tmp = get(filename1);
+                    cout << "Highscore Medium Level: " << tmp << endl;
+                }
+                if(isExist(filename2) == true && isEmpty(filename2) == false){
+                    string tmp = get(filename2);
+                    cout << "Highscore Hard Level: " << tmp << endl;
+                }
+                Sleep(2000);
+                cout << "Press any key to continue: ";
+                cin.ignore();
+                cin.get();
+                break;
+            }
+            case 2:{
+                clearScreen();
+                string filename = "DataActivity/About.txt";
+                print(filename);
+                Sleep(2000);
+                cout << "Press any key to continue: ";
+                cin.ignore();
+                cin.get();
+                break;
+            }
+            case 3:{
+                clearScreen();
+                string filename = "DataActivity/Help.txt";
+                print(filename);
+                Sleep(2000);
+                cout << "Press any key to continue: ";
+                cin.ignore();
+                cin.get();
+                break;
+            }
+            default:
+            {
+                clearScreen();
+                cout << "You have already entered a wrong choice! Please enter again!!!\n";
+                Sleep(1000);
+                break;
+            }
+        }
+    }
+}
+void playGame(hashTable& h, listNode& list)
 {
     while(1){
+        clearScreen();
         user u = login(h);
         // Dat co de quan ly viec choi va thoat khoi game
         bool flag = true;
@@ -867,21 +1294,24 @@ void playGame(hashTable& h)
             // New Game
             case 1:
             {
-                newGame(u, false);
+                newGame(u, false, list);
                 break;
             }
             case 2:
             {
+                viewScoreBoard();
+                break;
             }
             case 3:
             {
+                option(u);
             }
             case 4:{
                 if(!isChoice){
                     cout << "You have already entered wrong choice. Please enter again!\n";
                     break;
                 }
-                newGame(u, true);
+                newGame(u, true, list);
                 break;
             }
             default:{
