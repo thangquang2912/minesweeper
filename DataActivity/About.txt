@@ -1,5 +1,7 @@
 ------------------------------About---------------------------------------
                  Author: Tra Nguyen Quang Thang
+                Ho Chi Minh University of Science
+			Country: Viet Nam
                          Class : 23CTT5
                      Student ID : 23120353
               Gmail : 23120353@student.hcmus.edu.vn

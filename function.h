@@ -1,6 +1,12 @@
 //Có thể thêm phần gợi ý cho quá trình chơi game ở các mức độ
 //nghĩ thêm tính năng thoát ra khỏi các mục cho đẹp hơn
 //them gioi han so bom cho dong va cot khi sinh ngau nhien
+//them toa do cac ô vào cho user dễ thao tác
+//them so vao cac Ô cho dễ chọn
+//đưa thêm chức năng người chơi chọn một ô để mở bàn cờ sau đó sẽ tự đưa ra đường tới chiến thắng
+//thêm các màn hướng dẫn cách chơi
+//thêm đồng hồ đếm giờ
+//hiện cho ngươif chơi biết mình chơi thời gian bao nhiêu và xem ds kỷ lục nếu muốn
 #ifndef function_h
 #define function_h
 #include <iostream>

@@ -10,8 +10,8 @@ int rowsMediumLevel = 16;
 int colsMediumLevel = 16;
 int numsOfBombInMediumLevel = 40;
 // Hard Level
-int rowsHardLevel = 30;
-int colsHardLevel = 16;
+int rowsHardLevel = 16;
+int colsHardLevel = 30;
 int numsOfBombInHardLevel = 99;
 // Save The Game Before
 vector<vector<char>> tmpBoard{};
@@ -280,7 +280,12 @@ void copyBoardToDisplay(vector<vector<char>> &boardToDisplay, vector<vector<char
         }
     }
 }
-
+bool isInput(string input){
+    if(input[0] < '0' || input[0] > '9' || input.size() != 1){
+        return false;
+    }
+    return true;
+}
 void writeBoardToFile(vector<vector<char>> board, string level, string rows, string cols, string numsOfBomb, string fileName)
 {
     ofstream ofs;
@@ -778,6 +783,17 @@ void newGame(user u, bool isCon, listNode& list)
         {
             menuLevel();
             int level;
+            string input{};
+            cout << "Enter your choice: ";
+            cin >> input;
+            while(!isInput(input)){
+                clearScreen();
+                cout << "You have already entered wrong choice. Please enter again!\n";
+                cout << "Enter your choice: ";
+                cin >> input;
+            }
+            level = stoi(input);
+            int level;
             cout << "Enter your level you want to play: ";
             cin >> level;
             switch (level)
@@ -857,9 +873,17 @@ void newGame(user u, bool isCon, listNode& list)
     while (numsOfBomb != INT_MAX)
     {
         printWhenPlay(boardToDisplay, numsOfBomb);
+        string input{};
         int choice;
         cout << "Enter your choice: ";
-        cin >> choice;
+        cin >> input;
+        while(!isInput(input)){
+            clearScreen();
+            cout << "You have already entered wrong choice. Please enter again!\n";
+            cout << "Enter your choice: ";
+            cin >> input;
+        }
+        choice = stoi(input);
         switch (choice)
         {
         case 0:
@@ -1112,9 +1136,17 @@ void viewScoreBoard(){
     while(!out){
         clearScreen();
         menuLevel();
+        string input{};
         int choice;
-        cout << "Enter level you want to view scoreboards: ";
-        cin >> choice;
+        cout << "Enter your choice: ";
+        cin >> input;
+        while(!isInput(input)){
+            clearScreen();
+            cout << "You have already entered wrong choice. Please enter again!\n";
+            cout << "Enter your choice: ";
+            cin >> input;
+        }
+        choice = stoi(input);
         switch(choice){
             case 0:{
                 clearScreen();
@@ -1173,15 +1205,22 @@ void viewScoreBoard(){
         }
     }
 }
-
 void option(user u){
     bool out = false;
     while(!out){
         clearScreen();
         menuOption(u);
+        string input{};
         int choice;
         cout << "Enter your choice: ";
-        cin >> choice;
+        cin >> input;
+        while(!isInput(input)){
+            clearScreen();
+            cout << "You have already entered wrong choice. Please enter again!\n";
+            cout << "Enter your choice: ";
+            cin >> input;
+        }
+        choice = stoi(input);
         switch(choice){
             case 0:{
                 clearScreen();
@@ -1270,9 +1309,17 @@ void playGame(hashTable& h, listNode& list)
                 isChoice = true;
             }
             ifs.close();
+            string in{};
             int choose;
             cout << "Enter your choice: ";
-            cin >> choose;
+            cin >> in;
+            while(!isInput(in)){
+                clearScreen();
+                cout << "You have already entered wrong choice. Please enter again!\n";
+                cout << "Enter your choice: ";
+                cin >> in;
+            }
+            choose = stoi(in);
             clearScreen();
             switch (choose)
             {
