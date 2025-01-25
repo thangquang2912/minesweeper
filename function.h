@@ -1,4 +1,4 @@
-//Có thể thêm phần gợi ý cho quá trình chơi game ở các mức độ
+ //Có thể thêm phần gợi ý cho quá trình chơi game ở các mức độ
 //nghĩ thêm tính năng thoát ra khỏi các mục cho đẹp hơn
 //them gioi han so bom cho dong va cot khi sinh ngau nhien
 //them toa do cac ô vào cho user dễ thao tác
