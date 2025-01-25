@@ -281,8 +281,10 @@ void copyBoardToDisplay(vector<vector<char>> &boardToDisplay, vector<vector<char
     }
 }
 bool isInput(string input){
-    if(input[0] < '0' || input[0] > '9' || input.size() != 1){
+    for(int i = 0; i < input.size(); i++){
+        if(input[i] < '0' || input[i] > '9'){
         return false;
+    }
     }
     return true;
 }
@@ -778,6 +780,12 @@ void newGame(user u, bool isCon, listNode& list)
     string filename3 = "DataUsers/" + u.username + "/time.txt";
     bool isStartTime = false;
     if(!isCon){
+        if(isExist(filename)){
+            fs::remove(filename);
+            fs::remove(filename1);
+            fs::remove(filename2);
+            fs::remove(filename3);
+        }
         bool isCancel = false;
         while (!isCancel)
         {
@@ -793,9 +801,6 @@ void newGame(user u, bool isCon, listNode& list)
                 cin >> input;
             }
             level = stoi(input);
-            int level;
-            cout << "Enter your level you want to play: ";
-            cin >> level;
             switch (level)
             {
             case 0:
@@ -878,7 +883,6 @@ void newGame(user u, bool isCon, listNode& list)
         cout << "Enter your choice: ";
         cin >> input;
         while(!isInput(input)){
-            clearScreen();
             cout << "You have already entered wrong choice. Please enter again!\n";
             cout << "Enter your choice: ";
             cin >> input;
@@ -954,13 +958,23 @@ void newGame(user u, bool isCon, listNode& list)
         {
             vector<int> click;
             pair<int, int> p;
-            cout << "Enter your square you want to set flag: ";
-            cin >> p.first >> p.second;
-            while (p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' ')
-            {
-                cout << "You have already entered wrong choice. Please enter again!\n";
+            while(1){
                 cout << "Enter your square you want to set flag: ";
-                cin >> p.first >> p.second;
+                string num1{}, num2{};
+                cin >> num1 >> num2;
+                while(!isInput(num1) || !isInput(num2)){
+                    cout << "You have already entered wrong choice. Please enter again!\n";
+                    cout << "Enter your square you want to set flag: ";
+                    cin >> num1 >> num2;
+                }
+                p.first = stoi(num1);
+                p.second = stoi(num2);
+                if (p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' ')
+                {
+                    cout << "You have already entered wrong choice. Please enter again!\n";
+                }else{
+                    break;
+                }
             }
             click.push_back(p.first);
             click.push_back(p.second);
@@ -1024,13 +1038,23 @@ void newGame(user u, bool isCon, listNode& list)
             
             vector<int> click;
             pair<int, int> p;
-            cout << "Enter your square you want to open: ";
-            cin >> p.first >> p.second;
-            while (p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || boardToDisplay[p.first][p.second] == 'F' || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' ')
-            {
-                cout << "You have already entered wrong choice. Please enter again!\n";
-                cout << "Enter your square you want to open: ";
-                cin >> p.first >> p.second;
+            while(1){
+                cout << "Enter your square you want to set flag: ";
+                string num1{}, num2{};
+                cin >> num1 >> num2;
+                while(!isInput(num1) || !isInput(num2)){
+                    cout << "You have already entered wrong choice. Please enter again!\n";
+                    cout << "Enter your square you want to set flag: ";
+                    cin >> num1 >> num2;
+                }
+                p.first = stoi(num1);
+                p.second = stoi(num2);
+                if (p.first < 0 || p.second < 0 || p.first >= rows || p.second >= cols || (boardToDisplay[p.first][p.second] > '0' && boardToDisplay[p.first][p.second] < '9') || boardToDisplay[p.first][p.second] == ' ')
+                {
+                    cout << "You have already entered wrong choice. Please enter again!\n";
+                }else{
+                    break;
+                }
             }
             click.push_back(p.first);
             click.push_back(p.second);
@@ -1150,14 +1174,6 @@ void viewScoreBoard(){
         switch(choice){
             case 0:{
                 clearScreen();
-                cout << "Do you really want to exit?(Y/N): \n";
-                string isExit{};
-                cin >> isExit;
-                clearScreen();
-                if (isExit == "N")
-                {
-                    break;
-                }
                 out = true;
                 break;
             }
@@ -1224,14 +1240,6 @@ void option(user u){
         switch(choice){
             case 0:{
                 clearScreen();
-                cout << "Do you really want to exit?(Y/N): \n";
-                string isExit{};
-                cin >> isExit;
-                clearScreen();
-                if (isExit == "N")
-                {
-                    break;
-                }
                 out = true;
                 break;
             }
