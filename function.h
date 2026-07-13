@@ -8,6 +8,7 @@
 //thêm đồng hồ đếm giờ
 //hiện cho ngươif chơi biết mình chơi thời gian bao nhiêu và xem ds kỷ lục nếu muốn
 #ifndef function_h
+
 #define function_h
 #include <iostream>
 #include <queue>
