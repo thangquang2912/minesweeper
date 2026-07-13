@@ -95,6 +95,7 @@ struct hashTable
         tmp->next->key = key;
         tmp->next->value = value;
     }
+
     string searchValue ( string key ) {
         unsigned int index = hashFunction(key);
         if(table[index] == nullptr){
