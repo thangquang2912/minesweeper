@@ -1,7 +1,4 @@
 #include "function.h"
-
-// j4f
-//
 // CONSTANT
 // Easy Level
 int rowsEasyLevel = 8;
