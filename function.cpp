@@ -1,6 +1,7 @@
 #include "function.h"
 
 // CONSTANT
+
 // Easy Level
 int rowsEasyLevel = 8;
 int colsEasyLevel = 8;
