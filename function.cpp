@@ -1,6 +1,5 @@
 #include "function.h"
 
-
 // j4f
 
 // CONSTANT
