@@ -3,6 +3,7 @@
 // j4f
 
 // CONSTANT
+
 // Easy Level
 int rowsEasyLevel = 8;
 int colsEasyLevel = 8;
