@@ -1,8 +1,4 @@
 #include "function.h"
-
-
-
-
 // CONSTANT
 // Easy Level
 int rowsEasyLevel = 8;
