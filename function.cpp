@@ -1,5 +1,4 @@
 #include "function.h"
-
 // CONSTANT
 
 // Easy Level
